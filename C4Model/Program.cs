@@ -90,6 +90,42 @@ namespace C4Model
             contextView.PaperSize = PaperSize.A4_Landscape;
             containerView.AddAllElements();
 
+            // 3.1 Diagrama de Componentes - Api
+            Component view = app.AddComponent("View", "Permite la interaccion con el UI", "Kotlin");
+            Component viewModel = app.AddComponent("ViewModel", "Permite la interacion entre el UI y los repositorios", "Kotlin");
+            Component repository = app.AddComponent("Repository", "Conexión de las funcionalidades con el viewModel", "Kotlin");
+            Component network = app.AddComponent("Network", "Conexión con la API", "Kotlin, Retrofit");
+            Component room = app.AddComponent("Persistance", "Conexión con bd local", "Kotlin, Room");
+            Component sqlLite = app.AddComponent("SqlLite", "Base de datos sqlLite", "SqlLite");
+
+            app.Components.Where(c => "View".Equals(c.Name)).ToList().ForEach(c => cliente.Uses(c, "Uses"));
+            app.Components.Where(c => "View".Equals(c.Name)).ToList().ForEach(c => vendedor.Uses(c, "Uses"));
+            app.Components.Where(c => "View".Equals(c.Name)).ToList().ForEach(c => repartidor.Uses(c, "Uses"));
+
+            view.Uses(viewModel, "Usa");
+            viewModel.Uses(repository, "Usa");
+            repository.Uses(network, "Usa");
+            repository.Uses(room, "Usa");
+            network.Uses(restApi, "Usa", "Retrofit/JSON");
+            room.Uses(sqlLite, "Usa", "Room");
+
+            view.Uses(wereable, "Usa");
+
+            restApi.Uses(database ,"Usa", "jdbc: 1521");
+            restApi.Uses(mapas, "Usa", "googleApi");
+            restApi.Uses(pagos, "Usa");
+
+            sqlLite.AddTags("sqlDB");
+
+            styles.Add(new ElementStyle("sqlDB") { Background = "#717171", Color = "#ffffff", Shape = Shape.Cylinder });
+
+            ComponentView componentViewForRoot = viewSet.CreateComponentView(app, "Componentes-App", "Diagrama de Componentes (App)- Bodeguin");
+            componentViewForRoot.PaperSize = PaperSize.A4_Landscape;
+            componentViewForRoot.AddAllContainers();
+            componentViewForRoot.AddAllComponents();
+            componentViewForRoot.Add(cliente);
+            componentViewForRoot.Add(vendedor);
+            componentViewForRoot.Add(repartidor);
 
             structurizrClient.UnlockWorkspace(workspaceId);
             structurizrClient.PutWorkspace(workspaceId, workspace);
